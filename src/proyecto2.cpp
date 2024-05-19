@@ -119,8 +119,8 @@ int delay(int time) {
     int delay = rand() % 6 + 1;
     int actualTime = time + delay;
     if (actualTime <= 0) {
-        printf("Min Time: %d\n", MIN_EATING_TIME);
-        return MIN_EATING_TIME;
+        printf("Min Time: %d\n", MIN_TIME);
+        return MIN_TIME;
     } else {
         printf("Regular time: %d\n", actualTime);
         return actualTime;
@@ -141,10 +141,11 @@ Table** createTables(int amount) {
 
 int main() {
     printf("Beginning\n");
-    /* Chef chef;
+
+    Chef chef;
 
     chef.cookMeal(3);
-    chef.cookMeal(2); */
+    chef.cookMeal(2); 
 
     delay(10);
     delay(20);
