@@ -40,9 +40,14 @@ struct Order {
 class Customer {
 private:
     string selectedMeal; // Plato seleccionado para este cliente
-
 public:
     string name;
+    char status;
+    //S: Seated
+    //O: ordered
+    //W: waiting
+    //E: eating
+    //D: Done
     Customer(string name, string meal) : name(name), selectedMeal(meal) {}
 
     string getMeal() {
@@ -117,15 +122,22 @@ public:
     void simulateEating() {
         if (currentParty) {
             printf("Table %i is now serving a party of %i customers.\n", number, currentParty->size);
-            //cout << "Table " << number << " is now serving a party of " << currentParty->size << " customers.\n";
             for (int i = 0; i < currentParty->size; ++i) {
+                currentParty->customers[i]->status = 'S';
+                cout << "Customer " << currentParty->customers[i]->name << "'s status is" << currentParty->customers[i]->status<< "\n";
                 currentParty->customers[i]->orderMeal(); // cada cliente de la mesa pide su plato
                 waiter->takeOrder(currentParty->customers[i]);
+                currentParty->customers[i]->status = 'W';
+                cout << "Customer " << currentParty->customers[i]->name << "'s status is" << currentParty->customers[i]->status<< "\n";
                 cout <<  currentParty->customers[i]->name << " has begun eating.\n";
+                currentParty->customers[i]->status = 'E';
+                cout << "Customer " << currentParty->customers[i]->name << "'s status is" << currentParty->customers[i]->status<< "\n";
                 int eatingTime = delay(1);
                 printf("They will last %i seconds.\n", eatingTime);
                 eatMeal(eatingTime);
                 cout << "Customer " << currentParty->customers[i]->name << " is done eating.\n";
+                currentParty->customers[i]->status = 'D';
+                cout << "Customer " << currentParty->customers[i]->name << "'s status is" << currentParty->customers[i]->status<< "\n";
             }
             //this_thread::sleep_for(chrono::seconds(delay(MIN_EATING_TIME)));
             //freeTable();
