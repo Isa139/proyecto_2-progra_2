@@ -114,6 +114,7 @@ private:
     int capacity;
     bool occupied;
     Party* currentParty;
+    condition_variable cv;
     mutex mtx;
     Waiter* waiter;
 
@@ -142,6 +143,7 @@ public:
             }
             //this_thread::sleep_for(chrono::seconds(delay(MIN_EATING_TIME)));
             //freeTable();
+
             thread releaseThread(&Table::freeTable, this); // crear un hilo para liberar la mesa una vez que el grupo haya terminado de comer
             releaseThread.detach(); // lo hace un hilo independiente
         }
@@ -152,6 +154,23 @@ public:
         currentParty = party; // asigna el party a la mesa
         occupied = true; // la mesa ahora esta ocupada
         simulateEating();
+    }
+
+    void checkAndFreeTable() {
+        unique_lock<mutex> lock(mtx);
+        while (true) {
+            cv.wait(lock, [this]() {
+                for (int i = 0; i < currentParty->size; ++i) {
+                    if (currentParty->customers[i]->status != 'D') {
+                        return false;
+                    }
+                }
+                return true;
+            });
+
+            freeTable();
+            return;
+        }
     }
 
     void freeTable() { // libera la mesa
@@ -275,7 +294,7 @@ void runRestaurant() { // simulacion general del restaurante
 }
 
 
-//int main() {
-   // runRestaurant();
-  //  return 0;
-//}
+int main() {
+    runRestaurant();
+    return 0;
+}
