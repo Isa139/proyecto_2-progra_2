@@ -6,6 +6,7 @@
 #include <string>
 #include <queue>
 #include <mutex>
+#include "/Users/isagomez/Documents/GitHub/proyecto_2-progra_2/src/ActualizaInventario.cpp"
 
 using namespace std;
 
@@ -274,7 +275,7 @@ void runRestaurant() { // simulacion general del restaurante
 }
 
 
-int main() {
-    runRestaurant();
-    return 0;
-}
+//int main() {
+   // runRestaurant();
+  //  return 0;
+//}

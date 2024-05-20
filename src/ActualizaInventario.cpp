@@ -3,11 +3,32 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctime>
-#include <ctype.h>
-#include "/Users/isagomez/Documents/GitHub/proyecto_2-progra_2/src/version19_5.cpp"
+#include <ctype.h> // for isspace
 
 #define MAX_INGREDIENTS 10
 #define MAX_CHARS 50
+
+struct ingredient {
+    char name[MAX_CHARS];
+    int quantity;
+    struct ingredient *next;
+};
+
+struct recipe {
+    char name[MAX_CHARS];
+    int price;
+    int preparationTime;
+    int consumptionTime;
+    struct ingredient *ingredients;
+    struct recipe *next;
+};
+
+struct inventory {
+    char ingredient[MAX_CHARS];
+    int amount;
+    double price;
+    struct inventory *next;
+};
 
 void freeIngredients(struct ingredient *head) {
     struct ingredient *current = head;
@@ -24,7 +45,7 @@ void freeRecipes(struct recipe *head) {
         struct recipe *temp = current;
         freeIngredients(temp->ingredients);
         current = current->next;
-        free(temp);
+        free(temp); // Free the recipe
     }
 }
 
@@ -40,21 +61,25 @@ void freeInventory(struct inventory *head) {
 char *trimWhitespace(char *str) {
     char *end;
 
+    // Trim leading space
     while (isspace((unsigned char)*str)) str++;
 
+    // All spaces?
     if (*str == 0) return str;
 
+    // Trim trailing space
     end = str + strlen(str) - 1;
     while (end > str && isspace((unsigned char)*end)) end--;
 
-    *(end + 1) = '\0';
+    // Write new null terminator
+    *(end + 1) = 0;
 
     return str;
 }
 
 void toLowercase(char *str) {
     for (int i = 0; str[i]; i++) {
-        str[i] = tolower((unsigned char)str[i]);
+        str[i] = tolower(str[i]);
     }
 }
 
@@ -85,7 +110,9 @@ struct recipe *readRecipes(const char *fileName) {
             free(newRecipe);
             continue;
         }
-        strcpy(newRecipe->name, trimWhitespace(token));
+        // Convert the recipe name to lowercase
+        char *trimmedToken = trimWhitespace(token);
+        strcpy(newRecipe->name, trimmedToken);
         toLowercase(newRecipe->name);
 
         token = strtok(NULL, ",");
@@ -110,6 +137,7 @@ struct recipe *readRecipes(const char *fileName) {
             }
             newIngredient->next = NULL;
 
+            // Trim whitespace around ingredient name and convert to lowercase
             char *ingredientName = trimWhitespace(token);
             toLowercase(ingredientName);
             strcpy(newIngredient->name, ingredientName);
@@ -260,7 +288,7 @@ struct recipe* findRecipeByName(struct recipe* head, const char* recipeName) {
     struct recipe* current = head;
     char lowercaseName[MAX_CHARS];
     strcpy(lowercaseName, recipeName);
-    toLowercase(lowercaseName);
+    toLowercase(lowercaseName); // Convert to lowercase
 
     while (current != NULL) {
         if (strcmp(current->name, lowercaseName) == 0) {
@@ -289,21 +317,25 @@ void alterInventory(struct inventory *inventoryHead, const char *ingredientName,
     }
 }
 
-void prepareRecipe(struct recipe *recipe, struct inventory *inventoryHead) {
+bool prepareRecipe(struct recipe *recipe, struct inventory *inventoryHead) {
     struct ingredient *currentIngredient = recipe->ingredients;
 
     // Check if all ingredients are available in the required quantity
     while (currentIngredient != NULL) {
         char ingredientName[MAX_CHARS];
-        strcpy(ingredientName, trimWhitespace(currentIngredient->name));
-        printf("Checking ingredient: %s, quantity needed: %d\n", ingredientName, currentIngredient->quantity);
+        strcpy(ingredientName, currentIngredient->name); // Make a copy of the ingredient name
+        trimWhitespace(ingredientName); // Trim whitespace
+        printf("Checking ingredient: %s, quantity needed: %d\n", ingredientName, currentIngredient->quantity); // Debugging output
         struct inventory *currentInventory = inventoryHead;
         bool found = false;
         while (currentInventory != NULL) {
-            if (strcmp(trimWhitespace(currentInventory->ingredient), ingredientName) == 0) {
+            char inventoryIngredientName[MAX_CHARS];
+            strcpy(inventoryIngredientName, currentInventory->ingredient); // Make a copy of the inventory ingredient name
+            trimWhitespace(inventoryIngredientName); // Trim whitespace
+            if (strcmp(inventoryIngredientName, ingredientName) == 0) { // Compare trimmed names
                 if (currentInventory->amount < currentIngredient->quantity) {
                     fprintf(stderr, "Error: Not enough %s in inventory for recipe %s\n", currentInventory->ingredient, recipe->name);
-                    return;
+                    return false; // Not enough ingredients to prepare the recipe
                 }
                 found = true;
                 break;
@@ -312,7 +344,7 @@ void prepareRecipe(struct recipe *recipe, struct inventory *inventoryHead) {
         }
         if (!found) {
             fprintf(stderr, "Error: Ingredient %s not found in inventory for recipe %s\n", ingredientName, recipe->name);
-            return;
+            return false; // Ingredient not found in inventory
         }
         currentIngredient = currentIngredient->next;
     }
@@ -321,16 +353,18 @@ void prepareRecipe(struct recipe *recipe, struct inventory *inventoryHead) {
     currentIngredient = recipe->ingredients;
     while (currentIngredient != NULL) {
         char ingredientName[MAX_CHARS];
-        strcpy(ingredientName, trimWhitespace(currentIngredient->name));
-        toLowercase(ingredientName);
-        alterInventory(inventoryHead, ingredientName, -currentIngredient->quantity);
+        strcpy(ingredientName, currentIngredient->name); // Make a copy of the ingredient name
+        trimWhitespace(ingredientName); // Trim whitespace
+        toLowercase(ingredientName); // Convert to lowercase
+        alterInventory(inventoryHead, ingredientName, -currentIngredient->quantity); // Alter inventory
         currentIngredient = currentIngredient->next;
     }
 
     printf("Recipe %s prepared successfully!\n\n", recipe->name);
+    return true; // Successfully altered the inventory
 }
 
-/* int main() {
+int main() {
     initializeRandomSeed();
 
     const char *fileNameR = "/Users/isagomez/Documents/GitHub/proyecto_2-progra_2/data/recipes.csv";
@@ -389,4 +423,3 @@ void prepareRecipe(struct recipe *recipe, struct inventory *inventoryHead) {
     freeInventory(inventory);
     return 0;
 }
- */
