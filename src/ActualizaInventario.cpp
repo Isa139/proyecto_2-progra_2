@@ -276,6 +276,14 @@ char** getRecipeNames(struct recipe *head, int &count) {
     return recipeNames;
 }
 
+int getPreparationTime(struct recipe *r) {
+    if (r == NULL) {
+        fprintf(stderr, "Error: Null recipe pointer\n");
+        return -1; 
+    }
+    return r->preparationTime;
+}
+
 void initializeRandomSeed() {
     std::srand(std::time(nullptr));
 }
@@ -367,8 +375,8 @@ bool prepareRecipe(struct recipe *recipe, struct inventory *inventoryHead) {
 int main() {
     initializeRandomSeed();
 
-    const char *fileNameR = "/Users/isagomez/Documents/GitHub/proyecto_2-progra_2/data/recipes.csv";
-    const char *fileNameI = "/Users/isagomez/Documents/GitHub/proyecto_2-progra_2/data/inventory.csv";
+    const char *fileNameR = "/Users/jimer/Desktop/proyecto_2-progra_2/data/recipes.csv";
+    const char *fileNameI = "/Users/jimer/Desktop/proyecto_2-progra_2/data/inventory.csv";
 
     struct recipe *recipes = readRecipes(fileNameR);
     if (!recipes) {
