@@ -6,7 +6,7 @@
 #include <string>
 #include <queue>
 #include <mutex>
-#include "/Users/jimer/Desktop/proyecto_2-progra_2/src/ActualizaInventario.cpp"
+#include "ActualizaInventario.cpp"
 
 using namespace std;
 
@@ -18,6 +18,8 @@ using namespace std;
 #define TABLE_COUNT 6
 
 int delay(int time);
+struct recipe;
+
 
 int binaryRandom()
 {
@@ -137,16 +139,7 @@ public:
 
     Party(int size, int &customerCounter) : size(size)
     {
-        // array de platos en el menu
-        string menu[] = {"Cinnamon Rolls", "Apple Pie", "Cookies", "Chocolate Cupcakes", "Donuts", "Croissant", "Brownies", "Carrot Cake", "Caramel Flan", "Banana Muffins"};
-
-        for (int i = 0; i < size; ++i)
-        {
-            int choice = rand() % 10; // elige plato aleatoriamente
-            string selectedMeal = menu[choice];
-
-            customers[i] = new Customer("Customer" + to_string(customerCounter++), selectedMeal); // crear cada obj customer, nombre: counterCount, selecciona su plato
-        }
+       
     }
 };
 

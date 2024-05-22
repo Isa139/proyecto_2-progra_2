@@ -307,6 +307,42 @@ struct recipe* findRecipeByName(struct recipe* head, const char* recipeName) {
     return NULL;
 }
 
+char** obtainMenu(struct recipe* head, int& count) {
+    // First, calculate the number of recipes
+    count = 0;
+    struct recipe* current = head;
+    while (current != NULL) {
+        count++;
+        current = current->next;
+    }
+
+    // Allocate memory for the menu (array of char* pointers)
+    char** menu = (char**)malloc(count * sizeof(char*));
+    if (!menu) {
+        fprintf(stderr, "Error: Memory allocation failed\n");
+        return NULL;
+    }
+
+    // Populate the menu with recipe names
+    current = head;
+    for (int i = 0; i < count; ++i) {
+        menu[i] = (char*)malloc((strlen(current->name) + 1) * sizeof(char));
+        if (!menu[i]) {
+            fprintf(stderr, "Error: Memory allocation failed\n");
+            for (int j = 0; j < i; j++) {
+                free(menu[j]);
+            }
+            free(menu);
+            return NULL;
+        }
+        strcpy(menu[i], current->name);
+        current = current->next;
+    }
+
+    return menu;
+}
+
+
 void alterInventory(struct inventory *inventoryHead, const char *ingredientName, int quantityChange) {
     struct inventory *current = inventoryHead;
     bool found = false;
